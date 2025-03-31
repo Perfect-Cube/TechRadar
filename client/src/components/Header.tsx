@@ -30,6 +30,9 @@ export default function Header() {
             <Link href="/technologies" className={location === "/technologies" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
               Technologies
             </Link>
+            <Link href="/add" className={location === "/add" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
+              Add Items
+            </Link>
             <Link href="/about" className={location === "/about" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
               About
             </Link>
@@ -70,6 +73,9 @@ export default function Header() {
           </Link>
           <Link href="/technologies" className={location === "/technologies" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
             Technologies
+          </Link>
+          <Link href="/add" className={location === "/add" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
+            Add Items
           </Link>
           <Link href="/about" className={location === "/about" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
             About
