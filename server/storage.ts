@@ -351,6 +351,69 @@ export class MemStorage implements IStorage {
         custom_properties: JSON.stringify({ ecosystem_size: "large", learning_curve: "gentle" })
       },
       { 
+        name: "Python", 
+        quadrant: 3, 
+        ring: 0, 
+        description: "A high-level, general-purpose programming language known for its readability and versatility.",
+        website: "https://www.python.org",
+        tags: ["language", "backend", "data science", "machine learning"],
+        custom_properties: JSON.stringify({ ecosystem_size: "massive", learning_curve: "gentle" })
+      },
+      { 
+        name: "Java", 
+        quadrant: 3, 
+        ring: 0, 
+        description: "A class-based, object-oriented programming language designed for portability and cross-platform development.",
+        website: "https://www.java.com",
+        tags: ["language", "backend", "enterprise"],
+        custom_properties: JSON.stringify({ ecosystem_size: "massive", learning_curve: "medium" })
+      },
+      { 
+        name: "Django", 
+        quadrant: 3, 
+        ring: 1, 
+        description: "A high-level Python web framework that encourages rapid development and clean, pragmatic design.",
+        website: "https://www.djangoproject.com",
+        tags: ["framework", "python", "backend", "web"],
+        custom_properties: JSON.stringify({ ecosystem_size: "large", learning_curve: "medium" })
+      },
+      { 
+        name: "Flask", 
+        quadrant: 3, 
+        ring: 1, 
+        description: "A lightweight WSGI web application framework in Python, designed to make getting started quick and easy.",
+        website: "https://flask.palletsprojects.com",
+        tags: ["framework", "python", "backend", "web", "microservices"],
+        custom_properties: JSON.stringify({ ecosystem_size: "large", learning_curve: "gentle" })
+      },
+      { 
+        name: "Spring Boot", 
+        quadrant: 3, 
+        ring: 0, 
+        description: "An open-source Java-based framework used to create stand-alone, production-grade Spring-based applications.",
+        website: "https://spring.io/projects/spring-boot",
+        tags: ["framework", "java", "backend", "enterprise"],
+        custom_properties: JSON.stringify({ ecosystem_size: "large", learning_curve: "steep" })
+      },
+      { 
+        name: "TensorFlow", 
+        quadrant: 3, 
+        ring: 1, 
+        description: "An end-to-end open-source platform for machine learning, with a comprehensive ecosystem of tools.",
+        website: "https://www.tensorflow.org",
+        tags: ["machine learning", "python", "data science", "library"],
+        custom_properties: JSON.stringify({ ecosystem_size: "large", learning_curve: "steep" })
+      },
+      { 
+        name: "PyTorch", 
+        quadrant: 3, 
+        ring: 1, 
+        description: "An open-source machine learning library based on Torch, used for applications such as computer vision and natural language processing.",
+        website: "https://pytorch.org",
+        tags: ["machine learning", "python", "data science", "library"],
+        custom_properties: JSON.stringify({ ecosystem_size: "large", learning_curve: "medium" })
+      },
+      { 
         name: "Docker Compose", 
         quadrant: 1, 
         ring: 0, 
@@ -410,6 +473,14 @@ export class MemStorage implements IStorage {
         website: "https://cms.example.com",
         repository: "https://github.com/example/cms",
         image: "https://via.placeholder.com/300x200?text=CMS"
+      },
+      {
+        name: "Recommendation Engine",
+        description: "An AI-powered recommendation system using machine learning to personalize user experiences.",
+        status: "active",
+        website: "https://recommendation.example.com",
+        repository: "https://github.com/example/recommendation-engine",
+        image: "https://via.placeholder.com/300x200?text=Recommendation+Engine"
       }
     ];
 
@@ -474,7 +545,26 @@ export class MemStorage implements IStorage {
         { technology_id: 3, project_id: 6, notes: "Used for admin interface" }, // Vue.js
         { technology_id: 6, project_id: 6, notes: "Used for type safety" }, // TypeScript
         { technology_id: 22, project_id: 6, notes: "Main database" }, // PostgreSQL
-        { technology_id: 21, project_id: 6, notes: "Used for styling" } // TailwindCSS
+        { technology_id: 21, project_id: 6, notes: "Used for styling" }, // TailwindCSS
+
+        // Link Python and related technologies to projects
+        { technology_id: 27, project_id: 5, notes: "Used for data processing pipeline" }, // Python
+        { technology_id: 29, project_id: 3, notes: "Used for admin dashboard" }, // Django
+        { technology_id: 30, project_id: 2, notes: "Used for internal APIs" }, // Flask
+        { technology_id: 32, project_id: 5, notes: "Machine learning models for search ranking" }, // TensorFlow
+        { technology_id: 33, project_id: 5, notes: "Alternative ML library used for recommendation engine" }, // PyTorch
+
+        // Link Java and Spring Boot to projects
+        { technology_id: 28, project_id: 1, notes: "Backend services for inventory management" }, // Java
+        { technology_id: 31, project_id: 1, notes: "Framework for Java microservices" }, // Spring Boot
+        { technology_id: 28, project_id: 3, notes: "Used for performance-critical services" }, // Java
+        
+        // Recommendation Engine Project
+        { technology_id: 27, project_id: 7, notes: "Main development language" }, // Python
+        { technology_id: 32, project_id: 7, notes: "Main machine learning framework" }, // TensorFlow
+        { technology_id: 33, project_id: 7, notes: "Used for specialized neural network models" }, // PyTorch
+        { technology_id: 22, project_id: 7, notes: "Database for storing user preferences" }, // PostgreSQL
+        { technology_id: 24, project_id: 7, notes: "Caching for recommendation results" } // Redis
       ];
       
       techProjectLinks.forEach(link => {
