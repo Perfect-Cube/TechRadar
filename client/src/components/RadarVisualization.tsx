@@ -173,25 +173,48 @@ export default function RadarVisualization() {
         .attr("stroke", quadrantColor)
         .attr("stroke-width", 1);
       
-      // Quadrant labels - positioned outside the circle
-      const labelRadius = radius + 25; // Increased the distance from center
-      // Calculate position based on the quadrant center angle
-      const quadrantCenterAngle = angle + Math.PI / 4;
+      // Quadrant labels - consistently positioned outside the circle
+      // Use a larger radius to ensure all labels are completely outside
+      const labelRadius = radius + 55; // Even more increased distance for better spacing
+      
+      // Calculate position based on fixed angles for each quadrant (45°, 135°, 225°, 315°)
+      // This ensures all labels are evenly spaced at the center of each quadrant
+      const quadrantCenterAngles = [
+        Math.PI * 0.25,  // 45° - Languages & Frameworks
+        Math.PI * 0.75,  // 135° - Tools
+        Math.PI * 1.25,  // 225° - Platforms
+        Math.PI * 1.75   // 315° - Techniques
+      ];
+      const quadrantCenterAngle = quadrantCenterAngles[i];
+      
+      // Position labels at the exact quadrant centers
       const labelX = Math.cos(quadrantCenterAngle) * labelRadius;
       const labelY = Math.sin(quadrantCenterAngle) * labelRadius;
       
+      // Enhanced quadrant labels with better visibility
       g.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
         .attr("text-anchor", quadrantCenterAngle < Math.PI ? "start" : "end")
         .attr("alignment-baseline", quadrantCenterAngle < Math.PI / 2 || quadrantCenterAngle > 3 * Math.PI / 2 ? "hanging" : "baseline")
         .attr("fill", quadrantColor)
-        .attr("font-size", "14px") // Increased font size
+        .attr("font-size", "16px") // Even larger font size for better readability
         .attr("font-weight", "bold")
         .attr("class", "dark:fill-gray-100")
-        // Add a subtle background for better readability in dark mode
-        .attr("filter", "drop-shadow(0px 0px 2px rgba(0,0,0,0.5))")
+        // Add a background for better readability in both modes
+        .attr("filter", "drop-shadow(0px 0px 3px rgba(255,255,255,0.7)) drop-shadow(0px 0px 1px rgba(0,0,0,0.3))")
         .text(quadrants[i]?.name || "");
+        
+      // Add a subtle highlight behind each quadrant label for better contrast
+      g.append("rect")
+        .attr("x", labelX - (quadrantCenterAngle < Math.PI ? 5 : -5))
+        .attr("y", labelY - 12)
+        .attr("width", quadrants[i]?.name.length * 9) // Approximate width based on text length
+        .attr("height", 20)
+        .attr("rx", 5) // Rounded corners
+        .attr("fill", "rgba(255, 255, 255, 0.2)") // Very subtle background
+        .attr("class", "dark:fill-gray-800/20")
+        .attr("transform", `translate(${quadrantCenterAngle < Math.PI ? 0 : -quadrants[i]?.name.length * 9}, 0)`); // Adjust position based on text anchor
     });
 
     // Filter technologies by selected quadrant if any
