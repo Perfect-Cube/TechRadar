@@ -10,4 +10,36 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* Common styles */
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent;
+  }
+  
+  /* Dark theme custom styles */
+  .dark .radar-bg {
+    @apply bg-gray-950;
+  }
+  
+  .dark .tech-card {
+    @apply bg-gray-800 border-gray-700 hover:border-primary;
+  }
+  
+  .dark .project-card {
+    @apply bg-gray-800 border-gray-700 hover:bg-gray-700;
+  }
+  
+  .dark .radar-tooltip {
+    @apply bg-gray-800 text-gray-100 border-gray-700;
+  }
+  
+  /* Radar circles in dark mode */
+  .dark .radar-ring {
+    @apply stroke-gray-700 fill-transparent;
+  }
+  
+  /* Gradient text for heading elements in dark mode */
+  .dark .gradient-text {
+    @apply bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent;
+  }
 }

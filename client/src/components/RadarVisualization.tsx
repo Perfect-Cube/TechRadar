@@ -250,7 +250,7 @@ export default function RadarVisualization() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-8 container mx-auto">
+    <div className="bg-background radar-bg rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8 container mx-auto">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
         <h2 className="text-xl font-bold mb-2 lg:mb-0">Technology Radar Visualization</h2>
         
@@ -286,12 +286,12 @@ export default function RadarVisualization() {
             
             {/* Search results dropdown */}
             {searchResults && searchResults.length > 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-slate-200 max-h-60 overflow-auto">
+              <div className="absolute z-10 mt-1 w-full bg-background dark:bg-gray-800 rounded-md shadow-lg border border-slate-200 dark:border-gray-700 max-h-60 overflow-auto">
                 <ul className="py-1">
                   {searchResults.map((tech: Technology) => (
                     <li 
                       key={tech.id} 
-                      className="px-4 py-2 hover:bg-slate-100 cursor-pointer"
+                      className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-gray-700 cursor-pointer"
                       onClick={() => selectTechFromSearch(tech)}
                     >
                       <div className="font-medium">{tech.name}</div>
@@ -310,8 +310,8 @@ export default function RadarVisualization() {
             )}
             
             {searchResults && searchResults.length === 0 && (
-              <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-slate-200">
-                <div className="px-4 py-3 text-sm text-slate-500">No technologies found</div>
+              <div className="absolute z-10 mt-1 w-full bg-background dark:bg-gray-800 rounded-md shadow-lg border border-slate-200 dark:border-gray-700">
+                <div className="px-4 py-3 text-sm text-slate-500 dark:text-slate-400">No technologies found</div>
               </div>
             )}
           </form>
@@ -352,7 +352,7 @@ export default function RadarVisualization() {
             <div className="w-full lg:w-1/3 lg:pl-6">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold mb-2">Selected Technology</h3>
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                <div className="bg-slate-50 dark:bg-gray-800 rounded-lg p-4 border border-slate-200 dark:border-gray-700 tech-card">
                   {selectedTech ? (
                     <div>
                       <div className="mb-2">
@@ -365,13 +365,13 @@ export default function RadarVisualization() {
                             {quadrants[selectedTech.quadrant]?.name}
                           </span>
                           {selectedTech.tags && selectedTech.tags.map((tag, index) => (
-                            <span key={index} className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            <span key={index} className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
                               {tag}
                             </span>
                           ))}
                         </div>
                       </div>
-                      <p className="text-slate-600 text-sm mb-2">{selectedTech.description}</p>
+                      <p className="text-slate-600 dark:text-slate-300 text-sm mb-2">{selectedTech.description}</p>
                       
                       {selectedTech.website && (
                         <div className="mb-2">
@@ -379,7 +379,7 @@ export default function RadarVisualization() {
                             href={selectedTech.website} 
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="text-blue-600 text-sm hover:underline flex items-center"
+                            className="text-blue-600 dark:text-blue-400 text-sm hover:underline flex items-center"
                           >
                             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -389,13 +389,13 @@ export default function RadarVisualization() {
                         </div>
                       )}
                       
-                      <div className="mt-3 pt-3 border-t border-slate-200 flex justify-between">
-                        <a href={`/technologies?tech=${selectedTech.id}`} className="text-blue-600 text-sm font-medium hover:text-blue-800">
+                      <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700 flex justify-between">
+                        <a href={`/technologies?tech=${selectedTech.id}`} className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:text-blue-800 dark:hover:text-blue-300">
                           View full details →
                         </a>
                         <button 
                           onClick={toggleProjectsList}
-                          className="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center"
+                          className="text-blue-600 dark:text-blue-400 text-sm font-medium hover:text-blue-800 dark:hover:text-blue-300 flex items-center"
                         >
                           Related Projects
                           <svg className={`w-4 h-4 ml-1 transform ${showProjectsList ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,7 +405,7 @@ export default function RadarVisualization() {
                       </div>
                     </div>
                   ) : (
-                    <p className="text-slate-500 text-sm">Click on a technology in the radar to see details</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">Click on a technology in the radar to see details</p>
                   )}
                 </div>
               </div>
