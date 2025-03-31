@@ -7,31 +7,100 @@ import {
   RING_OPACITIES, 
   getRingColor, 
   getQuadrantAngle, 
-  getRingBgClass 
+  getRingBgClass,
+  getQuadrantBgClass
 } from "@/lib/radar-data";
+import ProjectList from "./ProjectList";
+
+// Create a simple type declaration file for this module
+declare module 'd3';
 
 export default function RadarVisualization() {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedTech, setSelectedTech] = useState<Technology | null>(null);
   const [selectedQuadrant, setSelectedQuadrant] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Technology[] | null>(null);
+  const [showProjectsList, setShowProjectsList] = useState(false);
 
-  const { data: technologies, isLoading: techsLoading } = useQuery({ 
-    queryKey: ['/api/technologies'],
+  // Query to fetch technologies (with search param if present)
+  const { 
+    data: technologies = [], 
+    isLoading: techsLoading,
+    refetch: refetchTechnologies
+  } = useQuery<Technology[]>({ 
+    queryKey: ['/api/technologies', searchQuery],
+    queryFn: async () => {
+      const endpoint = searchQuery 
+        ? `/api/technologies?q=${encodeURIComponent(searchQuery)}` 
+        : '/api/technologies';
+      const response = await fetch(endpoint);
+      if (!response.ok) {
+        throw new Error('Failed to fetch technologies');
+      }
+      return response.json();
+    }
   });
 
-  const { data: quadrants, isLoading: quadrantsLoading } = useQuery({ 
+  const { 
+    data: quadrants = [], 
+    isLoading: quadrantsLoading 
+  } = useQuery<Quadrant[]>({ 
     queryKey: ['/api/quadrants'],
   });
 
-  const { data: rings, isLoading: ringsLoading } = useQuery({ 
+  const { 
+    data: rings = [], 
+    isLoading: ringsLoading 
+  } = useQuery<Ring[]>({ 
     queryKey: ['/api/rings'],
   });
 
   const isLoading = techsLoading || quadrantsLoading || ringsLoading;
 
+  // Handle search submission
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    refetchTechnologies();
+    
+    if (searchQuery && technologies) {
+      const results = technologies.filter((tech: Technology) => 
+        tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tech.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (tech.tags && tech.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      );
+      setSearchResults(results);
+    } else {
+      setSearchResults(null);
+    }
+  };
+
+  // Clear search results and query
+  const clearSearch = () => {
+    setSearchQuery('');
+    setSearchResults(null);
+  };
+
+  // Select a technology from search results
+  const selectTechFromSearch = (tech: Technology) => {
+    setSelectedTech(tech);
+    setSearchResults(null); // Hide search results after selection
+    
+    // If the tech is in a different quadrant than the currently selected one,
+    // update the quadrant filter to show it
+    if (selectedQuadrant !== null && tech.quadrant !== selectedQuadrant) {
+      setSelectedQuadrant(tech.quadrant);
+    }
+  };
+
+  // Toggle showing projects list
+  const toggleProjectsList = () => {
+    setShowProjectsList(!showProjectsList);
+  };
+
   useEffect(() => {
-    if (isLoading || !technologies || !quadrants || !rings || !svgRef.current || !containerRef.current) {
+    if (isLoading || !svgRef.current || !containerRef.current) {
       return;
     }
 
@@ -65,13 +134,15 @@ export default function RadarVisualization() {
 
     // Draw rings
     rings.forEach((ring: Ring, i: number) => {
+      const ringColor = ring.color || RING_COLORS[i];
+      
       g.append("circle")
         .attr("cx", 0)
         .attr("cy", 0)
         .attr("r", ringRadii[i])
-        .attr("fill", RING_COLORS[i])
+        .attr("fill", ringColor)
         .attr("fill-opacity", RING_OPACITIES[i])
-        .attr("stroke", RING_COLORS[i])
+        .attr("stroke", ringColor)
         .attr("stroke-width", 1);
       
       // Ring labels
@@ -89,6 +160,7 @@ export default function RadarVisualization() {
 
     // Draw quadrant lines
     quadrantAngles.forEach((angle: number, i: number) => {
+      const quadrantColor = quadrants[i]?.color || "#64748b";
       const x2 = Math.cos(angle) * radius;
       const y2 = Math.sin(angle) * radius;
       
@@ -97,7 +169,7 @@ export default function RadarVisualization() {
         .attr("y1", 0)
         .attr("x2", x2)
         .attr("y2", y2)
-        .attr("stroke", "#64748b")
+        .attr("stroke", quadrantColor)
         .attr("stroke-width", 1);
       
       // Quadrant labels
@@ -110,10 +182,10 @@ export default function RadarVisualization() {
         .attr("y", labelY)
         .attr("text-anchor", angle < Math.PI ? "start" : "end")
         .attr("alignment-baseline", angle < Math.PI / 2 || angle > 3 * Math.PI / 2 ? "hanging" : "baseline")
-        .attr("fill", "#1e293b")
+        .attr("fill", quadrantColor)
         .attr("font-size", "12px")
         .attr("font-weight", "bold")
-        .text(quadrants[i].name);
+        .text(quadrants[i]?.name || "");
     });
 
     // Filter technologies by selected quadrant if any
@@ -136,20 +208,25 @@ export default function RadarVisualization() {
       const x = Math.cos(finalAngle) * finalRadius;
       const y = Math.sin(finalAngle) * finalRadius;
       
+      // Check if this technology is the selected one
+      const isSelected = selectedTech && selectedTech.id === tech.id;
+      
       // Technology dot
       g.append("circle")
         .attr("cx", x)
         .attr("cy", y)
-        .attr("r", 5)
-        .attr("fill", RING_COLORS[tech.ring])
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 1)
+        .attr("r", isSelected ? 7 : 5)
+        .attr("fill", rings[tech.ring]?.color || RING_COLORS[tech.ring])
+        .attr("stroke", isSelected ? "#000" : "#fff")
+        .attr("stroke-width", isSelected ? 2 : 1)
         .attr("cursor", "pointer")
-        .on("mouseover", function() {
-          d3.select(this).attr("r", 7);
+        .on("mouseover", function(this: SVGCircleElement) {
+          d3.select(this).attr("r", 7).attr("stroke", "#000");
         })
-        .on("mouseout", function() {
-          d3.select(this).attr("r", 5);
+        .on("mouseout", function(this: SVGCircleElement) {
+          if (!isSelected) {
+            d3.select(this).attr("r", 5).attr("stroke", "#fff");
+          }
         })
         .on("click", function() {
           setSelectedTech(tech);
@@ -160,13 +237,13 @@ export default function RadarVisualization() {
         .attr("x", x + 8)
         .attr("y", y + 3)
         .attr("text-anchor", "start")
-        .attr("fill", "#1e293b")
-        .attr("font-size", "10px")
-        .attr("font-weight", "500")
+        .attr("fill", isSelected ? "#000" : "#1e293b")
+        .attr("font-size", isSelected ? "12px" : "10px")
+        .attr("font-weight", isSelected ? "600" : "500")
         .text(tech.name);
     });
 
-  }, [isLoading, technologies, quadrants, rings, selectedQuadrant]);
+  }, [isLoading, technologies, quadrants, rings, selectedQuadrant, selectedTech]);
 
   const handleQuadrantFilter = (quadrantId: number | null) => {
     setSelectedQuadrant(quadrantId);
@@ -176,22 +253,87 @@ export default function RadarVisualization() {
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-8 container mx-auto">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
         <h2 className="text-xl font-bold mb-2 lg:mb-0">Technology Radar Visualization</h2>
-        <div className="flex flex-wrap gap-2">
-          <button 
-            className={`${selectedQuadrant === null ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 hover:bg-blue-100 text-slate-800 hover:text-blue-800'} px-3 py-1.5 rounded-full text-sm font-medium`}
-            onClick={() => handleQuadrantFilter(null)}
-          >
-            All Quadrants
-          </button>
-          {quadrants?.map((quadrant: Quadrant, index: number) => (
-            <button 
-              key={quadrant.id}
-              className={`${selectedQuadrant === index ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 hover:bg-blue-100 text-slate-800 hover:text-blue-800'} px-3 py-1.5 rounded-full text-sm font-medium`}
-              onClick={() => handleQuadrantFilter(index)}
+        
+        <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-4">
+          {/* Search component */}
+          <form onSubmit={handleSearch} className="relative w-full lg:w-64">
+            <input 
+              type="search" 
+              placeholder="Search technologies..." 
+              className="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <svg 
+              className="w-5 h-5 text-slate-400 absolute left-3 top-2.5" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
             >
-              {quadrant.name}
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+            
+            {/* Search results dropdown */}
+            {searchResults && searchResults.length > 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-slate-200 max-h-60 overflow-auto">
+                <ul className="py-1">
+                  {searchResults.map((tech: Technology) => (
+                    <li 
+                      key={tech.id} 
+                      className="px-4 py-2 hover:bg-slate-100 cursor-pointer"
+                      onClick={() => selectTechFromSearch(tech)}
+                    >
+                      <div className="font-medium">{tech.name}</div>
+                      <div className="flex items-center mt-1 space-x-2">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRingBgClass(tech.ring)}`}>
+                          {rings && rings[tech.ring]?.name}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getQuadrantBgClass(tech.quadrant)}`}>
+                          {quadrants && quadrants[tech.quadrant]?.name}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {searchResults && searchResults.length === 0 && (
+              <div className="absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-slate-200">
+                <div className="px-4 py-3 text-sm text-slate-500">No technologies found</div>
+              </div>
+            )}
+          </form>
+          
+          {/* Quadrant filter buttons */}
+          <div className="flex flex-wrap gap-2">
+            <button 
+              className={`${selectedQuadrant === null ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 hover:bg-blue-100 text-slate-800 hover:text-blue-800'} px-3 py-1.5 rounded-full text-sm font-medium`}
+              onClick={() => handleQuadrantFilter(null)}
+            >
+              All Quadrants
             </button>
-          ))}
+            {quadrants.map((quadrant: Quadrant, index: number) => (
+              <button 
+                key={quadrant.id}
+                className={`${selectedQuadrant === index ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 hover:bg-blue-100 text-slate-800 hover:text-blue-800'} px-3 py-1.5 rounded-full text-sm font-medium`}
+                onClick={() => handleQuadrantFilter(index)}
+              >
+                {quadrant.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -200,57 +342,95 @@ export default function RadarVisualization() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
         </div>
       ) : (
-        <div className="flex flex-col lg:flex-row">
-          <div className="w-full lg:w-2/3 mb-6 lg:mb-0">
-            <div ref={containerRef} className="w-full h-[500px] flex items-center justify-center">
-              <svg ref={svgRef}></svg>
+        <div className="flex flex-col">
+          <div className="flex flex-col lg:flex-row mb-6">
+            <div className="w-full lg:w-2/3 mb-6 lg:mb-0">
+              <div ref={containerRef} className="w-full h-[500px] flex items-center justify-center">
+                <svg ref={svgRef}></svg>
+              </div>
             </div>
-          </div>
-          <div className="w-full lg:w-1/3 lg:pl-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Selected Technology</h3>
-              <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                {selectedTech ? (
-                  <div>
-                    <div className="mb-2">
-                      <h4 className="font-semibold text-lg">{selectedTech.name}</h4>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRingBgClass(selectedTech.ring)}`}>
-                          {rings && rings[selectedTech.ring]?.name}
-                        </span>
-                        <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-                          {quadrants && quadrants[selectedTech.quadrant]?.name}
-                        </span>
+            <div className="w-full lg:w-1/3 lg:pl-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold mb-2">Selected Technology</h3>
+                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                  {selectedTech ? (
+                    <div>
+                      <div className="mb-2">
+                        <h4 className="font-semibold text-lg">{selectedTech.name}</h4>
+                        <div className="flex items-center flex-wrap gap-2 mt-1">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getRingBgClass(selectedTech.ring)}`}>
+                            {rings[selectedTech.ring]?.name}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${getQuadrantBgClass(selectedTech.quadrant)}`}>
+                            {quadrants[selectedTech.quadrant]?.name}
+                          </span>
+                          {selectedTech.tags && selectedTech.tags.map((tag, index) => (
+                            <span key={index} className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-slate-600 text-sm mb-2">{selectedTech.description}</p>
+                      
+                      {selectedTech.website && (
+                        <div className="mb-2">
+                          <a 
+                            href={selectedTech.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 text-sm hover:underline flex items-center"
+                          >
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            Visit website
+                          </a>
+                        </div>
+                      )}
+                      
+                      <div className="mt-3 pt-3 border-t border-slate-200 flex justify-between">
+                        <a href={`/technologies?tech=${selectedTech.id}`} className="text-blue-600 text-sm font-medium hover:text-blue-800">
+                          View full details →
+                        </a>
+                        <button 
+                          onClick={toggleProjectsList}
+                          className="text-blue-600 text-sm font-medium hover:text-blue-800 flex items-center"
+                        >
+                          Related Projects
+                          <svg className={`w-4 h-4 ml-1 transform ${showProjectsList ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
                       </div>
                     </div>
-                    <p className="text-slate-600 text-sm">{selectedTech.description}</p>
-                    <div className="mt-3 pt-3 border-t border-slate-200">
-                      <a href={`/technologies?tech=${selectedTech.id}`} className="text-blue-600 text-sm font-medium hover:text-blue-800">
-                        View full details →
-                      </a>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-slate-500 text-sm">Click on a technology in the radar to see details</p>
-                )}
+                  ) : (
+                    <p className="text-slate-500 text-sm">Click on a technology in the radar to see details</p>
+                  )}
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Legend</h3>
-              <div className="space-y-2">
-                {rings?.map((ring: Ring, index: number) => (
-                  <div key={ring.id} className="flex items-center">
-                    <div 
-                      className="w-4 h-4 rounded-full mr-2" 
-                      style={{ backgroundColor: RING_COLORS[index] }}
-                    ></div>
-                    <span className="text-sm">{ring.name}</span>
-                  </div>
-                ))}
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Legend</h3>
+                <div className="space-y-2">
+                  {rings.map((ring: Ring, index: number) => (
+                    <div key={ring.id} className="flex items-center">
+                      <div 
+                        className="w-4 h-4 rounded-full mr-2" 
+                        style={{ backgroundColor: ring.color || RING_COLORS[index] }}
+                      ></div>
+                      <span className="text-sm">{ring.name}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
+          
+          {/* Projects List */}
+          {showProjectsList && (
+            <ProjectList selectedTechnology={selectedTech} />
+          )}
         </div>
       )}
     </div>
