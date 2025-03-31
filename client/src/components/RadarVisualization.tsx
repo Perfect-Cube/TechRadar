@@ -196,32 +196,36 @@ export default function RadarVisualization() {
       const labelGroup = g.append("g")
         .attr("class", "quadrant-label");
         
-      // Background with improved positioning based on quadrant
+      // Enhanced background styling with more prominent appearance
       // For the first quadrant (Languages & Frameworks), we need special handling since it's longer
-      const bgWidth = quadrants[i]?.name.length * (i === 0 ? 10.5 : 9.5); // Wider for first quadrant
+      const bgWidth = quadrants[i]?.name.length * (i === 0 ? 11 : 10); // Wider for all quadrants
       
       // Add the background rectangle first (so it renders behind the text)
       labelGroup.append("rect")
         .attr("x", labelX - (quadrantCenterAngle < Math.PI ? 5 : bgWidth + 5))
         .attr("y", labelY - 12)
         .attr("width", bgWidth) // Width based on text length with some padding
-        .attr("height", 22) // Slightly taller
-        .attr("rx", 6) // Rounded corners
-        .attr("fill", "rgba(255, 255, 255, 0.15)") // Very subtle background
-        .attr("class", "dark:fill-gray-800/30");
+        .attr("height", 24) // Taller for more prominence
+        .attr("rx", 8) // More rounded corners
+        .attr("stroke", quadrantColor) // Border in quadrant color
+        .attr("stroke-width", 1) // Thin border
+        .attr("fill", "rgba(255, 255, 255, 0.25)") // More visible background
+        .attr("class", "dark:fill-gray-800/40 dark:stroke-opacity-50");
       
-      // Then add the text on top with enhanced visibility
+      // Then add the text on top with enhanced visibility and more prominent style
       labelGroup.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
         .attr("text-anchor", quadrantCenterAngle < Math.PI ? "start" : "end")
         .attr("alignment-baseline", quadrantCenterAngle < Math.PI / 2 || quadrantCenterAngle > 3 * Math.PI / 2 ? "hanging" : "baseline")
         .attr("fill", quadrantColor)
-        .attr("font-size", "16px") // Larger font size for better readability
+        .attr("font-size", "18px") // Even larger font size
         .attr("font-weight", "bold")
+        .attr("font-family", "Arial, sans-serif") // Specifying a font family
+        .attr("letter-spacing", "0.5px") // Adding letter spacing
         .attr("class", "dark:fill-gray-100")
-        // Add stronger drop shadow for better readability in both modes
-        .attr("filter", "drop-shadow(0px 0px 3px rgba(255,255,255,0.8)) drop-shadow(0px 0px 1px rgba(0,0,0,0.4))")
+        // Enhanced text effects with stronger shadow and outline effect
+        .attr("filter", "drop-shadow(0px 0px 4px rgba(255,255,255,0.9)) drop-shadow(0px 0px 2px rgba(0,0,0,0.5))")
         .text(quadrants[i]?.name || "");
     });
 
