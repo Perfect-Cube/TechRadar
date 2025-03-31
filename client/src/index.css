@@ -17,8 +17,12 @@
   }
   
   /* Dark theme custom styles */
+  .dark {
+    @apply text-gray-100;
+  }
+  
   .dark .radar-bg {
-    @apply bg-gray-950;
+    @apply bg-gray-950 border-gray-700;
   }
   
   .dark .tech-card {
@@ -41,5 +45,54 @@
   /* Gradient text for heading elements in dark mode */
   .dark .gradient-text {
     @apply bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent;
+  }
+  
+  /* Form elements in dark mode */
+  .dark input, 
+  .dark select, 
+  .dark textarea {
+    @apply bg-gray-800 border-gray-700 text-gray-100;
+  }
+  
+  .dark input::placeholder {
+    @apply text-gray-400;
+  }
+  
+  /* Buttons in dark mode */
+  .dark button {
+    @apply text-gray-100;
+  }
+  
+  .dark button.bg-slate-100 {
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+  }
+  
+  .dark button.bg-blue-100 {
+    @apply bg-blue-900 text-blue-200;
+  }
+  
+  /* Code and pre blocks */
+  .dark code, 
+  .dark pre {
+    @apply bg-gray-800 text-gray-200;
+  }
+  
+  /* Tables */
+  .dark table {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  .dark th, 
+  .dark td {
+    @apply border-gray-700;
+  }
+  
+  .dark tr:nth-child(even) {
+    @apply bg-gray-900;
+  }
+  
+  /* SVG elements in dark mode */
+  .dark svg text {
+    @apply fill-gray-300;
   }
 }

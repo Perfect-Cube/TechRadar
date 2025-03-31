@@ -145,13 +145,14 @@ export default function RadarVisualization() {
         .attr("stroke", ringColor)
         .attr("stroke-width", 1);
       
-      // Ring labels
+      // Ring labels with dark mode support
       g.append("text")
         .attr("x", 5)
         .attr("y", -ringRadii[i] + 15)
         .attr("text-anchor", "start")
         .attr("fill", "#64748b")
-        .attr("font-size", "10px")
+        .attr("class", "dark:fill-gray-400")
+        .attr("font-size", "11px")
         .text(ring.name);
     });
 
@@ -172,19 +173,22 @@ export default function RadarVisualization() {
         .attr("stroke", quadrantColor)
         .attr("stroke-width", 1);
       
-      // Quadrant labels
-      const labelRadius = radius + 15;
-      const labelX = Math.cos(angle + Math.PI / 4) * labelRadius;
-      const labelY = Math.sin(angle + Math.PI / 4) * labelRadius;
+      // Quadrant labels - positioned outside the circle
+      const labelRadius = radius + 25; // Increased the distance from center
+      // Calculate position based on the quadrant center angle
+      const quadrantCenterAngle = angle + Math.PI / 4;
+      const labelX = Math.cos(quadrantCenterAngle) * labelRadius;
+      const labelY = Math.sin(quadrantCenterAngle) * labelRadius;
       
       g.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
-        .attr("text-anchor", angle < Math.PI ? "start" : "end")
-        .attr("alignment-baseline", angle < Math.PI / 2 || angle > 3 * Math.PI / 2 ? "hanging" : "baseline")
+        .attr("text-anchor", quadrantCenterAngle < Math.PI ? "start" : "end")
+        .attr("alignment-baseline", quadrantCenterAngle < Math.PI / 2 || quadrantCenterAngle > 3 * Math.PI / 2 ? "hanging" : "baseline")
         .attr("fill", quadrantColor)
-        .attr("font-size", "12px")
+        .attr("font-size", "14px") // Increased font size
         .attr("font-weight", "bold")
+        .attr("class", "dark:fill-gray-300")
         .text(quadrants[i]?.name || "");
     });
 
@@ -211,7 +215,7 @@ export default function RadarVisualization() {
       // Check if this technology is the selected one
       const isSelected = selectedTech && selectedTech.id === tech.id;
       
-      // Technology dot
+      // Technology dot with dark mode support
       g.append("circle")
         .attr("cx", x)
         .attr("cy", y)
@@ -219,25 +223,33 @@ export default function RadarVisualization() {
         .attr("fill", rings[tech.ring]?.color || RING_COLORS[tech.ring])
         .attr("stroke", isSelected ? "#000" : "#fff")
         .attr("stroke-width", isSelected ? 2 : 1)
+        .attr("class", "dark:stroke-gray-800")
         .attr("cursor", "pointer")
         .on("mouseover", function(this: SVGCircleElement) {
-          d3.select(this).attr("r", 7).attr("stroke", "#000");
+          const isDarkMode = document.documentElement.classList.contains('dark');
+          d3.select(this)
+            .attr("r", 7)
+            .attr("stroke", isDarkMode ? "#fff" : "#000");
         })
         .on("mouseout", function(this: SVGCircleElement) {
           if (!isSelected) {
-            d3.select(this).attr("r", 5).attr("stroke", "#fff");
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            d3.select(this)
+              .attr("r", 5)
+              .attr("stroke", isDarkMode ? "#333" : "#fff");
           }
         })
         .on("click", function() {
           setSelectedTech(tech);
         });
       
-      // Technology label
+      // Technology label with dark mode support
       g.append("text")
         .attr("x", x + 8)
         .attr("y", y + 3)
         .attr("text-anchor", "start")
         .attr("fill", isSelected ? "#000" : "#1e293b")
+        .attr("class", "dark:fill-gray-300")
         .attr("font-size", isSelected ? "12px" : "10px")
         .attr("font-weight", isSelected ? "600" : "500")
         .text(tech.name);
