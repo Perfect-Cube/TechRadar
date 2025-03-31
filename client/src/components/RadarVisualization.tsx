@@ -173,15 +173,10 @@ export default function RadarVisualization() {
         .attr("stroke", quadrantColor)
         .attr("stroke-width", 1);
       
-      // Quadrant labels - consistently positioned outside the circle
-      // Use different radius values based on quadrant - special case for Languages & Frameworks which is longer
-      const labelRadiusValues = [
-        radius + 90,  // Much larger distance for Languages & Frameworks (index 0)
-        radius + 60,  // Adjusted for Tools (index 1)
-        radius + 60,  // Adjusted for Platforms (index 2)
-        radius + 60   // Adjusted for Techniques (index 3)
-      ];
-      const labelRadius = labelRadiusValues[i]; 
+      // Quadrant labels - consistently positioned outside the circle with equal padding
+      // Use a uniform radius value for all quadrants for consistent padding
+      const uniformOuterPadding = 70; // Equal padding for all quadrant labels
+      const labelRadius = radius + uniformOuterPadding;
       
       // Calculate position based on fixed angles for each quadrant (45°, 135°, 225°, 315°)
       // This ensures all labels are evenly spaced at the center of each quadrant
@@ -197,19 +192,26 @@ export default function RadarVisualization() {
       const labelX = Math.cos(quadrantCenterAngle) * labelRadius;
       const labelY = Math.sin(quadrantCenterAngle) * labelRadius;
       
+      // Create a group for better positioning of the label and its background
+      const labelGroup = g.append("g")
+        .attr("class", "quadrant-label");
+        
+      // Background with improved positioning based on quadrant
+      // For the first quadrant (Languages & Frameworks), we need special handling since it's longer
+      const bgWidth = quadrants[i]?.name.length * (i === 0 ? 10.5 : 9.5); // Wider for first quadrant
+      
       // Add the background rectangle first (so it renders behind the text)
-      g.append("rect")
-        .attr("x", labelX - (quadrantCenterAngle < Math.PI ? 5 : -5))
+      labelGroup.append("rect")
+        .attr("x", labelX - (quadrantCenterAngle < Math.PI ? 5 : bgWidth + 5))
         .attr("y", labelY - 12)
-        .attr("width", quadrants[i]?.name.length * 9.5) // Slightly wider to account for font style
+        .attr("width", bgWidth) // Width based on text length with some padding
         .attr("height", 22) // Slightly taller
         .attr("rx", 6) // Rounded corners
         .attr("fill", "rgba(255, 255, 255, 0.15)") // Very subtle background
-        .attr("class", "dark:fill-gray-800/30")
-        .attr("transform", `translate(${quadrantCenterAngle < Math.PI ? 0 : -quadrants[i]?.name.length * 9.5}, 0)`); // Adjust position based on text anchor
+        .attr("class", "dark:fill-gray-800/30");
       
       // Then add the text on top with enhanced visibility
-      g.append("text")
+      labelGroup.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
         .attr("text-anchor", quadrantCenterAngle < Math.PI ? "start" : "end")
