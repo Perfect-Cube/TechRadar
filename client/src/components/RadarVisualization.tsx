@@ -23,6 +23,8 @@ export default function RadarVisualization() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Technology[] | null>(null);
   const [showProjectsList, setShowProjectsList] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(true);
+  const techDotsRef = useRef<{[key: number]: {element: d3.Selection<SVGCircleElement, unknown, null, undefined>, initialX: number, initialY: number, angle: number, radius: number}}>({}); 
 
   // Query to fetch technologies (with search param if present)
   const { 
@@ -233,6 +235,44 @@ export default function RadarVisualization() {
     const filteredTechs = selectedQuadrant !== null 
       ? technologies.filter((tech: Technology) => tech.quadrant === selectedQuadrant)
       : technologies;
+      
+    // Function to animate tech dots
+    const startAnimation = () => {
+      // Reset the tech dots reference
+      techDotsRef.current = {};
+      
+      // Animation function for smooth clockwise movement
+      const animateDots = () => {
+        // Stop animation if component is unmounted or animation is turned off
+        if (!isAnimating) return;
+        
+        Object.values(techDotsRef.current).forEach((dot) => {
+          // Calculate new angle (clockwise rotation)
+          const rotationSpeed = 0.0005; // Speed of rotation
+          const newAngle = dot.angle + rotationSpeed;
+          
+          // Update angle for next animation frame
+          dot.angle = newAngle;
+          
+          // Calculate new position
+          const newX = Math.cos(newAngle) * dot.radius;
+          const newY = Math.sin(newAngle) * dot.radius;
+          
+          // Update dot position
+          dot.element
+            .attr("cx", newX)
+            .attr("cy", newY);
+        });
+        
+        // Continue animation loop
+        if (isAnimating) {
+          requestAnimationFrame(animateDots);
+        }
+      };
+      
+      // Start the animation
+      animateDots();
+    };
     
     // Plot technologies as dots
     filteredTechs.forEach((tech: Technology) => {
@@ -253,17 +293,21 @@ export default function RadarVisualization() {
       const isSelected = selectedTech && selectedTech.id === tech.id;
       
       // Technology dot with dark mode support - increased size for better visibility without labels
-      g.append("circle")
+      const techDot = g.append("circle")
         .attr("cx", x)
         .attr("cy", y)
         .attr("r", isSelected ? 9 : 7) // Larger dots since we don't have labels
         .attr("fill", rings[tech.ring]?.color || RING_COLORS[tech.ring])
         .attr("stroke", isSelected ? "#000" : "#fff")
         .attr("stroke-width", isSelected ? 3 : 2) // Thicker stroke for better visibility
-        .attr("class", "dark:stroke-gray-800")
+        .attr("class", "tech-dot dark:stroke-gray-800")
         .attr("cursor", "pointer")
+        .attr("data-tech-id", tech.id) // Add data attribute for identification
         .attr("data-tech-name", tech.name) // Add data attribute for tooltip/accessibility
         .on("mouseover", function(this: SVGCircleElement) {
+          // Pause animation when hovering
+          d3.selectAll(".tech-dot").interrupt();
+          
           const isDarkMode = document.documentElement.classList.contains('dark');
           d3.select(this)
             .attr("r", 10) // Even larger on hover
@@ -307,13 +351,68 @@ export default function RadarVisualization() {
           }
           // Remove all temporary tooltips
           d3.selectAll(".tech-tooltip, .tooltip-bg").remove();
+          
+          // Resume animation if it was paused
+          if (isAnimating) {
+            startAnimation();
+          }
         })
         .on("click", function() {
           setSelectedTech(tech);
         });
+        
+      // Store the dot reference with its initial position and angle for animation
+      techDotsRef.current[tech.id] = {
+        element: techDot,
+        initialX: x,
+        initialY: y,
+        angle: finalAngle,
+        radius: finalRadius
+      };
     });
+    
+    // Start animation for all dots
+    if (isAnimating) {
+      startAnimation();
+    }
 
-  }, [isLoading, technologies, quadrants, rings, selectedQuadrant, selectedTech]);
+  }, [isLoading, technologies, quadrants, rings, selectedQuadrant, selectedTech, isAnimating]);
+  
+  // Effect to handle animation state changes
+  useEffect(() => {
+    if (isAnimating && Object.keys(techDotsRef.current).length > 0) {
+      // Start animation when state changes to true and we have dots
+      const animateDots = () => {
+        if (!isAnimating) return;
+        
+        Object.values(techDotsRef.current).forEach((dot) => {
+          // Calculate new angle (clockwise rotation)
+          const rotationSpeed = 0.0005; // Speed of rotation
+          const newAngle = dot.angle + rotationSpeed;
+          
+          // Update angle for next animation frame
+          dot.angle = newAngle;
+          
+          // Calculate new position
+          const newX = Math.cos(newAngle) * dot.radius;
+          const newY = Math.sin(newAngle) * dot.radius;
+          
+          // Update dot position
+          dot.element
+            .attr("cx", newX)
+            .attr("cy", newY);
+        });
+        
+        // Continue animation loop
+        if (isAnimating) {
+          requestAnimationFrame(animateDots);
+        }
+      };
+      
+      // Start the animation
+      requestAnimationFrame(animateDots);
+    }
+  }, [isAnimating]);
 
   const handleQuadrantFilter = (quadrantId: number | null) => {
     setSelectedQuadrant(quadrantId);
@@ -325,6 +424,34 @@ export default function RadarVisualization() {
         <h2 className="text-xl font-bold mb-2 lg:mb-0 gradient-text dark:bg-gradient-to-r dark:from-blue-300 dark:to-indigo-200">Technology Radar Visualization</h2>
         
         <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-4">
+          {/* Animation toggle */}
+          <button
+            className={`hidden sm:flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
+              isAnimating 
+                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
+                : 'bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200'
+            }`}
+            onClick={() => setIsAnimating(!isAnimating)}
+            title={isAnimating ? "Pause animation" : "Start animation"}
+          >
+            {isAnimating ? (
+              <>
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Pause
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Animate
+              </>
+            )}
+          </button>
+          
           {/* Search component with dark mode support */}
           <form onSubmit={handleSearch} className="relative w-full lg:w-64">
             <input 
