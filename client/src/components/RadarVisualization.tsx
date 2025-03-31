@@ -246,46 +246,65 @@ export default function RadarVisualization() {
       // Check if this technology is the selected one
       const isSelected = selectedTech && selectedTech.id === tech.id;
       
-      // Technology dot with dark mode support
+      // Technology dot with dark mode support - increased size for better visibility without labels
       g.append("circle")
         .attr("cx", x)
         .attr("cy", y)
-        .attr("r", isSelected ? 7 : 5)
+        .attr("r", isSelected ? 9 : 7) // Larger dots since we don't have labels
         .attr("fill", rings[tech.ring]?.color || RING_COLORS[tech.ring])
         .attr("stroke", isSelected ? "#000" : "#fff")
-        .attr("stroke-width", isSelected ? 2 : 1)
+        .attr("stroke-width", isSelected ? 3 : 2) // Thicker stroke for better visibility
         .attr("class", "dark:stroke-gray-800")
         .attr("cursor", "pointer")
+        .attr("data-tech-name", tech.name) // Add data attribute for tooltip/accessibility
         .on("mouseover", function(this: SVGCircleElement) {
           const isDarkMode = document.documentElement.classList.contains('dark');
           d3.select(this)
-            .attr("r", 7)
-            .attr("stroke", isDarkMode ? "#fff" : "#000");
+            .attr("r", 10) // Even larger on hover
+            .attr("stroke", isDarkMode ? "#fff" : "#000")
+            .attr("stroke-width", 3);
+            
+          // Add a temporary tooltip on hover
+          const tooltip = g.append("text")
+            .attr("x", x)
+            .attr("y", y - 15)
+            .attr("text-anchor", "middle")
+            .attr("fill", isDarkMode ? "#fff" : "#000")
+            .attr("class", `tech-tooltip dark:fill-gray-100`)
+            .attr("font-size", "12px")
+            .attr("font-weight", "600")
+            .attr("pointer-events", "none") // Don't interfere with mouse events
+            .attr("filter", "drop-shadow(0px 0px 3px rgba(255,255,255,0.8)) drop-shadow(0px 0px 1px rgba(0,0,0,0.5))")
+            .text(tech.name);
+            
+          // Add light background behind tooltip text
+          const bbox = tooltip.node()?.getBBox();
+          if (bbox) {
+            g.insert("rect", "text.tech-tooltip")
+              .attr("x", bbox.x - 5)
+              .attr("y", bbox.y - 2)
+              .attr("width", bbox.width + 10)
+              .attr("height", bbox.height + 4)
+              .attr("rx", 3)
+              .attr("fill", isDarkMode ? "rgba(30, 41, 59, 0.8)" : "rgba(255, 255, 255, 0.8)")
+              .attr("class", "tooltip-bg")
+              .attr("pointer-events", "none");
+          }
         })
         .on("mouseout", function(this: SVGCircleElement) {
           if (!isSelected) {
             const isDarkMode = document.documentElement.classList.contains('dark');
             d3.select(this)
-              .attr("r", 5)
-              .attr("stroke", isDarkMode ? "#333" : "#fff");
+              .attr("r", 7)
+              .attr("stroke", isDarkMode ? "#333" : "#fff")
+              .attr("stroke-width", 2);
           }
+          // Remove all temporary tooltips
+          d3.selectAll(".tech-tooltip, .tooltip-bg").remove();
         })
         .on("click", function() {
           setSelectedTech(tech);
         });
-      
-      // Technology label with dark mode support - improved visibility
-      g.append("text")
-        .attr("x", x + 8)
-        .attr("y", y + 3)
-        .attr("text-anchor", "start")
-        .attr("fill", isSelected ? "#000" : "#1e293b")
-        .attr("class", "dark:fill-gray-200")
-        .attr("font-size", isSelected ? "12px" : "10px")
-        .attr("font-weight", isSelected ? "600" : "500")
-        // Add a slight text shadow for better visibility in dark mode
-        .attr("filter", "drop-shadow(0px 0px 1px rgba(0,0,0,0.3))")
-        .text(tech.name);
     });
 
   }, [isLoading, technologies, quadrants, rings, selectedQuadrant, selectedTech]);
