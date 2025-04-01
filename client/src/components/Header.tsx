@@ -25,19 +25,10 @@ export default function Header() {
         <div className="hidden md:flex items-center space-x-6">
           <nav className="flex space-x-5">
             <Link href="/" className={location === "/" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
-              Overview
-            </Link>
-            <Link href="/" className={location === "/radar" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
               Radar
             </Link>
             <Link href="/technologies" className={location === "/technologies" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
               Technologies
-            </Link>
-            <Link href="/add" className={location === "/add" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
-              Add Items
-            </Link>
-            <Link href="/about" className={location === "/about" ? "text-blue-600 dark:text-blue-400 font-medium" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium"}>
-              About
             </Link>
           </nav>
           
@@ -69,19 +60,10 @@ export default function Header() {
       <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden bg-white dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 px-4 py-3`}>
         <nav className="flex flex-col space-y-3">
           <Link href="/" className={location === "/" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
-            Overview
-          </Link>
-          <Link href="/" className={location === "/radar" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
             Radar
           </Link>
           <Link href="/technologies" className={location === "/technologies" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
             Technologies
-          </Link>
-          <Link href="/add" className={location === "/add" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
-            Add Items
-          </Link>
-          <Link href="/about" className={location === "/about" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
-            About
           </Link>
         </nav>
         <div className="mt-4 relative">
