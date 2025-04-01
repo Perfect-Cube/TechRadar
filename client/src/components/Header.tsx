@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import vwLogo from "@assets/vw-logo.png";
 
 export default function Header() {
   const [location] = useLocation();
@@ -12,11 +13,13 @@ export default function Header() {
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-700 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <svg className="h-8 w-8 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9c.83 0 1.5-.67 1.5-1.5S7.83 8 7 8s-1.5.67-1.5 1.5S6.17 11 7 11zm8-1.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5 1.5-.67 1.5-1.5zM12 16c1.94 0 3.5-1.56 3.5-3.5 0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5 0 1.94 1.56 3.5 3.5 3.5z"></path>
-          </svg>
-          <h1 className="text-lg md:text-xl font-bold gradient-text">Tech Radar</h1>
+        <div className="flex items-center space-x-3">
+          <img 
+            src={vwLogo} 
+            alt="Volkswagen Logo" 
+            className="h-10 w-10"
+          />
+          <h1 className="text-lg md:text-xl font-bold gradient-text">VW Tech Radar</h1>
         </div>
         
         <div className="hidden md:flex items-center space-x-6">
