@@ -188,9 +188,14 @@ export default function RadarVisualization() {
         .attr("stroke", quadrantColor)
         .attr("stroke-width", 1);
       
-      // Quadrant labels positioned further away from the radar with more padding
-      const uniformOuterPadding = 120; // Increased padding for labels
-      const labelRadius = radius + uniformOuterPadding;
+      // Quadrant labels with varying distances to match the reference image
+      const labelRadiusValues = [
+        radius + 35,  // Much larger distance for Languages & Frameworks (index 0)
+        radius + 70,  // Adjusted for Tools (index 1)
+        radius + 50,  // Adjusted for Platforms (index 2)
+        radius + 170   // Adjusted for Techniques (index 3)
+      ];
+      const labelRadius = labelRadiusValues[i]; 
       
       // Calculate position based on fixed angles for each quadrant (45°, 135°, 225°, 315°)
       // This ensures all labels are evenly spaced at the center of each quadrant
@@ -198,7 +203,7 @@ export default function RadarVisualization() {
         Math.PI * 0.25,  // 45° - Languages & Frameworks
         Math.PI * 0.75,  // 135° - Tools
         Math.PI * 1.25,  // 225° - Platforms
-        Math.PI * 1.75   // 315° - Techniques
+        Math.PI * 1.82   // 315° - Techniques
       ];
       const quadrantCenterAngle = quadrantCenterAngles[i];
       
