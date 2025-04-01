@@ -23,7 +23,7 @@ export default function RadarVisualization() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Technology[] | null>(null);
   const [showProjectsList, setShowProjectsList] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false); // Set animation to false by default
   const techDotsRef = useRef<{[key: number]: {element: d3.Selection<SVGCircleElement, unknown, null, undefined>, initialX: number, initialY: number, angle: number, radius: number}}>({}); 
 
   // Query to fetch technologies (with search param if present)
@@ -194,40 +194,17 @@ export default function RadarVisualization() {
       const labelX = Math.cos(quadrantCenterAngle) * labelRadius;
       const labelY = Math.sin(quadrantCenterAngle) * labelRadius;
       
-      // Create a group for better positioning of the label and its background
-      const labelGroup = g.append("g")
-        .attr("class", "quadrant-label");
-        
-      // Enhanced background styling with more prominent appearance
-      // For the first quadrant (Languages & Frameworks), we need special handling since it's longer
-      const bgWidth = quadrants[i]?.name.length * (i === 0 ? 11 : 10); // Wider for all quadrants
-      
-      // Add the background rectangle first (so it renders behind the text)
-      labelGroup.append("rect")
-        .attr("x", labelX - (quadrantCenterAngle < Math.PI ? 5 : bgWidth + 5))
-        .attr("y", labelY - 12)
-        .attr("width", bgWidth) // Width based on text length with some padding
-        .attr("height", 24) // Taller for more prominence
-        .attr("rx", 8) // More rounded corners
-        .attr("stroke", quadrantColor) // Border in quadrant color
-        .attr("stroke-width", 1) // Thin border
-        .attr("fill", "rgba(255, 255, 255, 0.25)") // More visible background
-        .attr("class", "dark:fill-gray-800/40 dark:stroke-opacity-50");
-      
-      // Then add the text on top with enhanced visibility and more prominent style
-      labelGroup.append("text")
+      // Add text labels without background boxes
+      g.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
         .attr("text-anchor", quadrantCenterAngle < Math.PI ? "start" : "end")
         .attr("alignment-baseline", quadrantCenterAngle < Math.PI / 2 || quadrantCenterAngle > 3 * Math.PI / 2 ? "hanging" : "baseline")
         .attr("fill", quadrantColor)
-        .attr("font-size", "18px") // Even larger font size
+        .attr("font-size", "18px")
         .attr("font-weight", "bold")
-        .attr("font-family", "Arial, sans-serif") // Specifying a font family
-        .attr("letter-spacing", "0.5px") // Adding letter spacing
+        .attr("font-family", "Arial, sans-serif")
         .attr("class", "dark:fill-gray-100")
-        // Enhanced text effects with stronger shadow and outline effect
-        .attr("filter", "drop-shadow(0px 0px 4px rgba(255,255,255,0.9)) drop-shadow(0px 0px 2px rgba(0,0,0,0.5))")
         .text(quadrants[i]?.name || "");
     });
 
@@ -424,34 +401,6 @@ export default function RadarVisualization() {
         <h2 className="text-xl font-bold mb-2 lg:mb-0 gradient-text dark:bg-gradient-to-r dark:from-blue-300 dark:to-indigo-200">Technology Radar Visualization</h2>
         
         <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-4">
-          {/* Animation toggle */}
-          <button
-            className={`hidden sm:flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
-              isAnimating 
-                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' 
-                : 'bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-200'
-            }`}
-            onClick={() => setIsAnimating(!isAnimating)}
-            title={isAnimating ? "Pause animation" : "Start animation"}
-          >
-            {isAnimating ? (
-              <>
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Pause
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Animate
-              </>
-            )}
-          </button>
-          
           {/* Search component with dark mode support */}
           <form onSubmit={handleSearch} className="relative w-full lg:w-64">
             <input 
