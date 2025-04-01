@@ -20,7 +20,7 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex flex-col min-h-screen dark bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <div className="flex flex-col min-h-screen dark bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
         <Header />
         <main className="flex-grow">
           <Router />

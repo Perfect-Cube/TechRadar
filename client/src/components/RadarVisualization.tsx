@@ -147,13 +147,26 @@ export default function RadarVisualization() {
         .attr("stroke", ringColor)
         .attr("stroke-width", 1);
       
-      // Ring labels with dark mode support
-      g.append("text")
+      // Ring labels with dark mode support - using dark semi-transparent background
+      const ringLabelGroup = g.append("g").attr("class", "ring-label");
+      
+      // Add dark background for ring label
+      ringLabelGroup.append("rect")
         .attr("x", 5)
-        .attr("y", -ringRadii[i] + 15)
+        .attr("y", -ringRadii[i] + 5)
+        .attr("width", ring.name.length * 7)
+        .attr("height", 20)
+        .attr("rx", 4)
+        .attr("fill", "rgba(13, 17, 23, 0.7)")
+        .attr("class", "dark:fill-gray-900/70");
+      
+      // Add the ring label text
+      ringLabelGroup.append("text")
+        .attr("x", 10)
+        .attr("y", -ringRadii[i] + 18)
         .attr("text-anchor", "start")
-        .attr("fill", "#64748b")
-        .attr("class", "dark:fill-gray-400")
+        .attr("fill", "#ffffff")
+        .attr("class", "dark:fill-gray-200")
         .attr("font-size", "11px")
         .text(ring.name);
     });
@@ -175,9 +188,8 @@ export default function RadarVisualization() {
         .attr("stroke", quadrantColor)
         .attr("stroke-width", 1);
       
-      // Quadrant labels - consistently positioned outside the circle with equal padding
-      // Use a uniform radius value for all quadrants for consistent padding
-      const uniformOuterPadding = 70; // Equal padding for all quadrant labels
+      // Quadrant labels positioned further away from the radar with more padding
+      const uniformOuterPadding = 120; // Increased padding for labels
       const labelRadius = radius + uniformOuterPadding;
       
       // Calculate position based on fixed angles for each quadrant (45°, 135°, 225°, 315°)
@@ -194,13 +206,27 @@ export default function RadarVisualization() {
       const labelX = Math.cos(quadrantCenterAngle) * labelRadius;
       const labelY = Math.sin(quadrantCenterAngle) * labelRadius;
       
-      // Add text labels without background boxes
-      g.append("text")
+      // Create a group for the label and its background
+      const labelGroup = g.append("g").attr("class", "quadrant-label");
+      
+      // Add dark background for labels
+      const textWidth = quadrants[i]?.name.length * 10; // Estimate text width
+      labelGroup.append("rect")
+        .attr("x", quadrantCenterAngle < Math.PI ? labelX - 10 : labelX - textWidth - 10)
+        .attr("y", labelY - 20)
+        .attr("width", textWidth + 20)
+        .attr("height", 40)
+        .attr("rx", 8) // Rounded corners
+        .attr("fill", "rgba(13, 17, 23, 0.7)") // Dark semi-transparent background
+        .attr("class", "dark:fill-gray-900/70");
+      
+      // Add text labels with light text
+      labelGroup.append("text")
         .attr("x", labelX)
         .attr("y", labelY)
         .attr("text-anchor", quadrantCenterAngle < Math.PI ? "start" : "end")
-        .attr("alignment-baseline", quadrantCenterAngle < Math.PI / 2 || quadrantCenterAngle > 3 * Math.PI / 2 ? "hanging" : "baseline")
-        .attr("fill", quadrantColor)
+        .attr("alignment-baseline", "middle")
+        .attr("fill", "#ffffff") // White text color
         .attr("font-size", "18px")
         .attr("font-weight", "bold")
         .attr("font-family", "Arial, sans-serif")
@@ -396,7 +422,7 @@ export default function RadarVisualization() {
   };
 
   return (
-    <div className="bg-background radar-bg rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-8 container mx-auto">
+    <div className="bg-background radar-bg rounded-lg shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-700 p-6 mb-8 container mx-auto">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
         <h2 className="text-xl font-bold mb-2 lg:mb-0 gradient-text dark:bg-gradient-to-r dark:from-blue-300 dark:to-indigo-200">Technology Radar Visualization</h2>
         

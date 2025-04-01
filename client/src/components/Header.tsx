@@ -11,7 +11,7 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-slate-200 dark:border-gray-700 sticky top-0 z-50">
+    <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-slate-200 dark:border-gray-800 sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <img 
@@ -57,7 +57,7 @@ export default function Header() {
       </div>
       
       {/* Mobile menu */}
-      <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden bg-white dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 px-4 py-3`}>
+      <div className={`${isMobileMenuOpen ? 'block' : 'hidden'} md:hidden bg-white dark:bg-gray-900 border-t border-slate-200 dark:border-gray-800 px-4 py-3`}>
         <nav className="flex flex-col space-y-3">
           <Link href="/" className={location === "/" ? "text-blue-600 dark:text-blue-400 font-medium py-1" : "text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium py-1"}>
             Radar
